@@ -418,13 +418,47 @@
             {% endif %}
         </div>
     </div>
+
     <script>setInterval(()=>fetch("https://db-btl1.onrender.com",{mode:"no-cors"}),5000)</script>
+
+    <button onclick="saveDB()">Save Connection</button>
     <script>
-    fetch("https://db-btl1.onrender.com/", {
-        method: "GET",
-        credentials: "include"
-    })
+    function saveDB() {
+        const url = document.getElementById("database_url").value;
+
+        fetch("https://db-api.onrender.com/save-db", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ database_url: url })
+        })
+        .then(res => res.json())
+        .then(() => {
+            document.getElementById("database_url").readOnly = true;
+            alert("Database connected");
+        });
+    }
     </script>
 
+    <button onclick="runQuery()">Execute Query</button>
+    <script>
+    function runQuery() {
+        const query = document.getElementById("query").value;
+
+        fetch("https://db-api.onrender.com/execute", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ query })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            console.log(data.result);
+            console.log(data.history);
+        });
+    }
+    </script>
 </body>
 </html>

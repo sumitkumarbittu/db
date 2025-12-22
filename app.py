@@ -1,68 +1,70 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import psycopg2
-import os
 
-app = Flask(__name__, template_folder=".")
+app = Flask(__name__)
 CORS(app, origins=["*"])
 
-app.secret_key = "change-this-secret-key"
-
-def get_db_connection():
-    return psycopg2.connect(session.get("DATABASE_URL"))
-
+DATABASE_URL = None
+QUERY_HISTORY = []
 
 MAX_HISTORY = 10
 
-@app.route("/", methods=["GET", "POST"])
-def index():
+def get_db_connection():
+    return psycopg2.connect(DATABASE_URL)
 
-    if "query_history" not in session:
-        session["query_history"] = []
 
-    if request.method == "POST":
+@app.route("/save-db", methods=["POST"])
+def save_db():
+    global DATABASE_URL
+    data = request.json
+    DATABASE_URL = data.get("database_url")
+    return jsonify({"status": "saved"})
 
-        if request.form.get("database_url"):
-            session["DATABASE_URL"] = request.form.get("database_url")
 
-        query = request.form.get("query")
+@app.route("/execute", methods=["POST"])
+def execute_query():
+    global QUERY_HISTORY
 
-        if query:
-            try:
-                conn = get_db_connection()
-                cur = conn.cursor()
-                cur.execute(query)
+    if not DATABASE_URL:
+        return jsonify({"error": "Database not connected"}), 400
 
-                history = session["query_history"]
-                history.append(query)
-                session["query_history"] = history[-10:]
+    query = request.json.get("query")
 
-                if query.strip().lower().startswith("select"):
-                    rows = cur.fetchall()
-                    columns = [desc[0] for desc in cur.description]
-                    result = {
-                        "columns": columns,
-                        "rows": rows
-                    }
-                else:
-                    conn.commit()
-                    result = "Query executed successfully."
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(query)
 
-                cur.close()
-                conn.close()
+        QUERY_HISTORY.append(query)
+        QUERY_HISTORY = QUERY_HISTORY[-MAX_HISTORY:]
 
-            except Exception as e:
-                error = str(e)
+        if query.strip().lower().startswith("select"):
+            rows = cur.fetchall()
+            columns = [d[0] for d in cur.description]
+            result = {"columns": columns, "rows": rows}
+        else:
+            conn.commit()
+            result = "Query executed successfully"
 
-    return render_template(
-        "index.html",
-        result=locals().get("result"),
-        error=locals().get("error"),
-        database_url=session.get("DATABASE_URL"),
-        history=session.get("query_history", [])[::-1]
-    )
+        cur.close()
+        conn.close()
 
+        return jsonify({
+            "result": result,
+            "history": QUERY_HISTORY[::-1]
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/status", methods=["GET"])
+def status():
+    return jsonify({
+        "connected": DATABASE_URL is not None
+    })
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5010)
+    app.run(port=5010)
