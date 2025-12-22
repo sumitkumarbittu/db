@@ -418,6 +418,13 @@
             {% endif %}
         </div>
     </div>
-    <script>setInterval(()=>fetch("https://your-custom-url.com"),5000)</script>
+    <script>setInterval(()=>fetch("https://db-btl1.onrender.com",{mode:"no-cors"}),5000)</script>
+    <script>
+    fetch("https://db-btl1.onrender.com/", {
+        method: "GET",
+        credentials: "include"
+    })
+    </script>
+
 </body>
 </html>
