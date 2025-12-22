@@ -299,6 +299,13 @@
 <p>Execute SQL queries with style and ease</p>
 </div>
 
+<div id="render-status"
+     class="status-badge disconnected"
+     style="margin-bottom:20px;">
+  🔴 Render : Disconnected
+</div>
+
+
 <!-- DATABASE CARD -->
 <div class="card">
 <div class="card-header">
@@ -419,6 +426,31 @@ function renderHistory(list) {
     ul.appendChild(li);
   });
 }
+
+function checkRenderStatus() {
+  fetch(API + "/health", { cache: "no-store" })
+    .then(res => {
+      if (!res.ok) throw new Error("Down");
+      return res.json();
+    })
+    .then(() => {
+      const badge = document.getElementById("render-status");
+      badge.innerText = "🟢 Render : Connected";
+      badge.className = "status-badge connected";
+    })
+    .catch(() => {
+      const badge = document.getElementById("render-status");
+      badge.innerText = "🔴 Render : Disconnected";
+      badge.className = "status-badge disconnected";
+    });
+}
+
+// initial check
+checkRenderStatus();
+
+// repeat every 20 seconds
+setInterval(checkRenderStatus, 20000);
+
 </script>
 
 </body>
