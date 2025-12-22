@@ -425,7 +425,7 @@
     function saveDB() {
         const url = document.getElementById("database_url").value;
 
-        fetch("https://db-api.onrender.com/save-db", {
+        fetch("https://db-btl1.onrender.com/save-db", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ database_url: url })
@@ -442,7 +442,7 @@
     function runQuery() {
         const query = document.getElementById("query").value;
 
-        fetch("https://db-api.onrender.com/execute", {
+        fetch("https://db-btl1.onrender.com/execute", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ query })
