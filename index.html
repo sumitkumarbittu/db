@@ -324,7 +324,7 @@
                            {% if database_url %}readonly{% endif %}
                            required>
                 </div>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" onclick="saveDB()">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
@@ -347,7 +347,7 @@
                     <label for="query">Enter your SQL query</label>
                     <textarea id="query" name="query" placeholder="SELECT * FROM users WHERE active = true;&#10;&#10;-- Write your SQL query here...&#10;-- Press Execute to run" required></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" onclick="runQuery()">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -421,7 +421,6 @@
 
     <script>setInterval(()=>fetch("https://db-btl1.onrender.com",{mode:"no-cors"}),5000)</script>
 
-    <button onclick="saveDB()">Save Connection</button>
     <script>
     function saveDB() {
         const url = document.getElementById("database_url").value;
@@ -439,7 +438,6 @@
     }
     </script>
 
-    <button onclick="runQuery()">Execute Query</button>
     <script>
     function runQuery() {
         const query = document.getElementById("query").value;
