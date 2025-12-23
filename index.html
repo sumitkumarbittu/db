@@ -358,7 +358,7 @@ setInterval(() => fetch("https://db-btl1.onrender.com", {mode:"no-cors"}), 20000
 
 <!-- 🔹 LOGIC -->
 <script>
-const API = "https://db-btl1.onrender.com";
+const API = "http://localhost:5010";//"https://db-btl1.onrender.com";
 
 function saveDB() {
   const url = document.getElementById("database_url").value;
@@ -396,7 +396,42 @@ function runQuery() {
 
 function renderError(msg) {
   document.getElementById("result").innerHTML =
-    `<div class="result-box error"><strong>⚠️ Error:</strong> ${msg}</div>`;
+    `<div class="result-box error"><strong>⚠️ Error:</strong> ${escapeHtml(msg)}</div>`;
+}
+
+function escapeHtml(value) {
+  const s = value === null || value === undefined ? "" : String(value);
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function renderBytea(base64) {
+  const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+  const isPdf = base64.startsWith("JVBERi0");
+  const blob = new Blob([bytes], { type: isPdf ? "application/pdf" : "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+
+  return `
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      ${isPdf ? `<iframe src="${url}" style="width:200px;height:250px;border-radius:8px;border:0;"></iframe>` : ""}
+      <img src="${url}"
+           style="max-width:150px; max-height:150px; border-radius:8px;"
+           onerror="this.style.display='none'">
+      <a href="${url}" target="_blank" rel="noopener noreferrer">Open</a>
+      <a href="${url}" download>Download</a>
+    </div>
+  `;
+}
+
+function renderCell(cell) {
+  if (cell && typeof cell === "object" && cell.__type === "bytea" && typeof cell.base64 === "string") {
+    return renderBytea(cell.base64);
+  }
+  return escapeHtml(cell);
 }
 
 function renderResult(res) {
@@ -406,14 +441,14 @@ function renderResult(res) {
     html += `</tr>`;
     res.rows.forEach(r => {
       html += "<tr>";
-      r.forEach(cell => html += `<td>${cell}</td>`);
+      r.forEach(cell => html += `<td>${renderCell(cell)}</td>`);
       html += "</tr>";
     });
     html += `</table></div>`;
     document.getElementById("result").innerHTML = html;
   } else {
     document.getElementById("result").innerHTML =
-      `<div class="result-box success">${res}</div>`;
+      `<div class="result-box success">${escapeHtml(res)}</div>`;
   }
 }
 

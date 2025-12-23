@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import psycopg2
+import base64
 
 app = Flask(__name__)
 CORS(app, origins=["*"])
@@ -9,6 +10,16 @@ DATABASE_URL = None
 QUERY_HISTORY = []
 
 MAX_HISTORY = 10
+
+def serialize_cell(cell):
+    if isinstance(cell, memoryview):
+        cell = cell.tobytes()
+    if isinstance(cell, (bytes, bytearray)):
+        return {
+            "__type": "bytea",
+            "base64": base64.b64encode(cell).decode("utf-8")
+        }
+    return cell
 
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL)
@@ -42,7 +53,10 @@ def execute_query():
         if query.strip().lower().startswith("select"):
             rows = cur.fetchall()
             columns = [d[0] for d in cur.description]
-            result = {"columns": columns, "rows": rows}
+            result = {
+                "columns": columns,
+                "rows": [[serialize_cell(c) for c in row] for row in rows]
+            }
         else:
             conn.commit()
             result = "Query executed successfully"
@@ -58,7 +72,6 @@ def execute_query():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
@@ -69,6 +82,5 @@ def status():
     return jsonify({
         "connected": DATABASE_URL is not None
     })
-
 if __name__ == "__main__":
     app.run(port=5010)
