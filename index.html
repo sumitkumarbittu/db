@@ -500,7 +500,10 @@ setInterval(() => fetch("https://db-btl1.onrender.com", {mode:"no-cors"}), 20000
 
 <!-- 🔹 LOGIC -->
 <script>
-const API = "https://db-btl1.onrender.com";     //"http://localhost:5010";
+const API = "http://localhost:5010";//"https://db-btl1.onrender.com";
+
+const QUERY_HISTORY = [];
+const MAX_HISTORY = 10;
 
 function saveDB() {
   const url = document.getElementById("database_url").value;
@@ -532,7 +535,13 @@ function runQuery() {
       return;
     }
     renderResult(data.result);
-    renderHistory(data.history);
+
+    const trimmed = (q || "").trim();
+    if (trimmed) {
+      QUERY_HISTORY.unshift(trimmed);
+      if (QUERY_HISTORY.length > MAX_HISTORY) QUERY_HISTORY.length = MAX_HISTORY;
+      renderHistory(QUERY_HISTORY);
+    }
   });
 }
 
@@ -811,7 +820,17 @@ function renderHistory(list) {
   list.forEach(q => {
     const li = document.createElement("li");
     li.className = "history-item";
-    li.innerHTML = `<pre>${q}</pre>`;
+    li.dataset.query = q;
+    const pre = document.createElement("pre");
+    pre.textContent = q;
+    li.appendChild(pre);
+    li.style.cursor = "pointer";
+    li.addEventListener("click", () => {
+      const textarea = document.getElementById("query");
+      textarea.value = li.dataset.query || "";
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    });
     ul.appendChild(li);
   });
 }

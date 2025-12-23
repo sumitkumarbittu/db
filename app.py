@@ -7,8 +7,6 @@ app = Flask(__name__)
 CORS(app, origins=["*"])
 
 DATABASE_URL = None
-QUERY_HISTORY = []
-
 MAX_HISTORY = 10
 
 def serialize_cell(cell):
@@ -35,8 +33,6 @@ def save_db():
 
 @app.route("/execute", methods=["POST"])
 def execute_query():
-    global QUERY_HISTORY
-
     if not DATABASE_URL:
         return jsonify({"error": "Database not connected"}), 400
 
@@ -46,9 +42,6 @@ def execute_query():
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(query)
-
-        QUERY_HISTORY.append(query)
-        QUERY_HISTORY = QUERY_HISTORY[-MAX_HISTORY:]
 
         if query.strip().lower().startswith("select"):
             rows = cur.fetchall()
@@ -65,8 +58,7 @@ def execute_query():
         conn.close()
 
         return jsonify({
-            "result": result,
-            "history": QUERY_HISTORY[::-1]
+            "result": result
         })
 
     except Exception as e:
