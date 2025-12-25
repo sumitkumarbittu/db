@@ -1,4 +1,4 @@
-const API = "http://localhost:5010";         //"https://db-btl1.onrender.com";     //
+const API ="https://db-btl1.onrender.com";     // "http://localhost:5010";         //
 
 const QUERY_HISTORY = [];
 const MAX_HISTORY = 10;
