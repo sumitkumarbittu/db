@@ -685,7 +685,9 @@ setInterval(checkRenderStatus, 20000);
   let tz = "IST";
   let themeIndex = 0;
   let locked = false;
-  let scale = 1;
+  let scale = 0.7;                 // initial small size
+  widget.style.transform = "scale(0.7)";
+
 
   /* ---------- CLOCK (STABLE) ---------- */
   function updateClock() {
