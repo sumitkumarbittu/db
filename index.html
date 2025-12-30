@@ -80,6 +80,24 @@ placeholder="postgresql://user:password@host:5432/dbname">
 <div id="result" class="result-tile resizable-vertical" aria-live="polite"></div>
 </div>
 
+<div id="clock-widget" class="theme-0">
+  <div class="clock-toolbar">
+    <button id="colorBtn" title="Color">●</button>
+    <button id="tzBtn" title="GMT / IST">IST</button>
+    <button id="lockBtn" title="Lock">🔓</button>
+  </div>
+
+  <div class="clock-body" id="dragArea">
+    <div class="time-box"><div class="num" id="hh">00</div></div>
+    <div class="time-box"><div class="num" id="mm">00</div></div>
+    <div class="time-box"><div class="num" id="ss">00</div></div>
+    <div class="time-box"><div class="num" id="ms">000</div></div>
+  </div>
+
+  <div class="resize-handle"></div>
+</div>
+
+
 <!-- HISTORY CARD -->
 <div class="card">
 <div class="card-header">

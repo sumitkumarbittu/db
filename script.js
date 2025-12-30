@@ -662,3 +662,119 @@ checkRenderStatus();
 
 // repeat every 20 seconds
 setInterval(checkRenderStatus, 20000);
+
+// clock widget
+(() => {
+  /* ---------- ELEMENTS ---------- */
+  const widget = document.getElementById("clock-widget");
+  const dragArea = document.getElementById("dragArea");
+
+  const hh = document.getElementById("hh");
+  const mm = document.getElementById("mm");
+  const ss = document.getElementById("ss");
+  const ms = document.getElementById("ms");
+
+  const colorBtn = document.getElementById("colorBtn");
+  const tzBtn = document.getElementById("tzBtn");
+  const lockBtn = document.getElementById("lockBtn");
+  const resizeHandle = widget.querySelector(".resize-handle");
+
+  if (!widget || !dragArea) return; // safety
+
+  /* ---------- STATE ---------- */
+  let tz = "IST";
+  let themeIndex = 0;
+  let locked = false;
+  let scale = 1;
+
+  /* ---------- CLOCK (STABLE) ---------- */
+  function updateClock() {
+    let t = Date.now();
+
+    if (tz === "IST") {
+      t += 330 * 60 * 1000;
+    }
+
+    const d = new Date(t);
+
+    hh.textContent = String(d.getUTCHours()).padStart(2, "0");
+    mm.textContent = String(d.getUTCMinutes()).padStart(2, "0");
+    ss.textContent = String(d.getUTCSeconds()).padStart(2, "0");
+    ms.textContent = Math.floor(d.getUTCMilliseconds() / 100);
+  }
+
+  updateClock();
+  setInterval(updateClock, 100);
+
+  /* ---------- TZ TOGGLE ---------- */
+  tzBtn.onclick = () => {
+    tz = tz === "IST" ? "GMT" : "IST";
+    tzBtn.textContent = tz;
+    updateClock();
+  };
+
+  /* ---------- COLOR TOGGLE ---------- */
+  colorBtn.onclick = () => {
+    widget.classList.remove(`theme-${themeIndex}`);
+    themeIndex = (themeIndex + 1) % 7;
+    widget.classList.add(`theme-${themeIndex}`);
+  };
+
+  /* ---------- LOCK ---------- */
+  lockBtn.onclick = () => {
+    locked = !locked;
+    lockBtn.textContent = locked ? "🔒" : "🔓";
+  };
+
+  /* ---------- DRAG (ONLY BODY) ---------- */
+  dragArea.addEventListener("pointerdown", (e) => {
+    if (locked) return;
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startLeft = widget.offsetLeft;
+    const startTop = widget.offsetTop;
+
+    dragArea.setPointerCapture(e.pointerId);
+
+    const move = (ev) => {
+      widget.style.left = startLeft + (ev.clientX - startX) + "px";
+      widget.style.top = startTop + (ev.clientY - startY) + "px";
+    };
+
+    const up = () => {
+      dragArea.releasePointerCapture(e.pointerId);
+      dragArea.removeEventListener("pointermove", move);
+      dragArea.removeEventListener("pointerup", up);
+    };
+
+    dragArea.addEventListener("pointermove", move);
+    dragArea.addEventListener("pointerup", up);
+  });
+
+  /* ---------- SCALE (SAFE) ---------- */
+  resizeHandle.addEventListener("pointerdown", (e) => {
+    if (locked) return;
+    e.stopPropagation();
+
+    const startX = e.clientX;
+    const startScale = scale;
+
+    resizeHandle.setPointerCapture(e.pointerId);
+
+    const move = (ev) => {
+      scale = Math.min(2.2, Math.max(0.6, startScale + (ev.clientX - startX) / 300));
+      widget.style.transform = `scale(${scale})`;
+    };
+
+    const up = () => {
+      resizeHandle.releasePointerCapture(e.pointerId);
+      resizeHandle.removeEventListener("pointermove", move);
+      resizeHandle.removeEventListener("pointerup", up);
+    };
+
+    resizeHandle.addEventListener("pointermove", move);
+    resizeHandle.addEventListener("pointerup", up);
+  });
+
+})();
