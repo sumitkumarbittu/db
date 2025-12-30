@@ -563,11 +563,13 @@ tr:hover {
 
 #clock-widget {
   position: fixed;
-  top: 60px;
-  left: 60px;
+  top: 16px;
+  right: 16px;
+  left: auto;            /* important */
   font-family: system-ui, -apple-system, Segoe UI, monospace;
   user-select: none;
   cursor: default;
+  transform-origin: top right;
 }
 
 /* ---------- THEMES (7 colors) ---------- */
