@@ -1,4 +1,57 @@
-const API ="https://db-btl1.onrender.com";     // "http://localhost:5010";         //
+const API_BASES = {
+  A: "https://db-btl1.onrender.com",
+  B: "https://db2-tle6.onrender.com",
+  C: "https://db3-isfk.onrender.com",
+  D: "https://db4-oj0t.onrender.com"
+};
+
+let ACTIVE_API_KEY = "A";
+
+function getActiveApiBase() {
+  return API_BASES[ACTIVE_API_KEY] || Object.values(API_BASES)[0] || "";
+}
+
+function setActiveApiKey(key) {
+  if (!key || !API_BASES[key]) return;
+  ACTIVE_API_KEY = key;
+  try { localStorage.setItem("active_api_key", key); } catch (_) {}
+  renderApiSelector();
+  checkRenderStatus();
+}
+
+function loadActiveApiKey() {
+  try {
+    const stored = localStorage.getItem("active_api_key");
+    if (stored && API_BASES[stored]) {
+      ACTIVE_API_KEY = stored;
+      return;
+    }
+  } catch (_) {}
+  const first = Object.keys(API_BASES)[0];
+  if (first) ACTIVE_API_KEY = first;
+}
+
+function renderApiSelector() {
+  const host = document.getElementById("api-selector");
+  if (!host) return;
+
+  const keys = Object.keys(API_BASES);
+  host.innerHTML = "";
+  keys.forEach((k) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "api-chip";
+    btn.textContent = k;
+    btn.setAttribute("aria-label", `Select API ${k}`);
+    const isActive = k === ACTIVE_API_KEY;
+    btn.classList.toggle("active", isActive);
+    btn.classList.toggle("inactive", !isActive);
+    btn.addEventListener("click", () => setActiveApiKey(k));
+    host.appendChild(btn);
+  });
+}
+
+loadActiveApiKey();
 
 const QUERY_HISTORY = [];
 const MAX_HISTORY = 10;
@@ -13,7 +66,7 @@ let __lastQueryText = "";
 function saveDB() {
   const url = document.getElementById("database_url").value;
 
-  fetch(API + "/save-db", {
+  fetch(getActiveApiBase() + "/save-db", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({ database_url: url })
@@ -78,7 +131,7 @@ function runQuery() {
   const q = document.getElementById("query").value;
   __lastQueryText = q || "";
 
-  fetch(API + "/execute", {
+  fetch(getActiveApiBase() + "/execute", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({ query: q })
@@ -640,7 +693,7 @@ function renderHistory(list) {
 }
 
 function checkRenderStatus() {
-  fetch(API + "/health", { cache: "no-store" })
+  fetch(getActiveApiBase() + "/health", { cache: "no-store" })
     .then(res => {
       if (!res.ok) throw new Error("Down");
       return res.json();
@@ -658,6 +711,7 @@ function checkRenderStatus() {
 }
 
 // initial check
+renderApiSelector();
 checkRenderStatus();
 
 // repeat every 20 seconds

@@ -374,6 +374,49 @@ tr:hover {
     color: #991b1b;
 }
 
+.api-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+    max-width: 520px;
+}
+
+.api-chip {
+    height: 34px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.95);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    touch-action: manipulation;
+}
+
+.api-chip:hover {
+    transform: translateY(-1px);
+}
+
+.api-chip.inactive {
+    opacity: 0.45;
+}
+
+.api-chip.active {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.92);
+    color: #111827;
+    border-color: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.18);
+}
+
 .bytea-thumb {
     display: inline-flex;
     flex-direction: column;
@@ -556,6 +599,11 @@ tr:hover {
 
     th, td {
         padding: 8px;
+    }
+
+    .api-selector {
+        max-width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
     }
 }
 
