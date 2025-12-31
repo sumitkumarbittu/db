@@ -732,26 +732,50 @@ setInterval(checkRenderStatus, 20000);
   dragArea.addEventListener("pointerdown", (e) => {
     if (locked) return;
 
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startLeft = widget.offsetLeft;
-    const startTop = widget.offsetTop;
+    if (e.button !== undefined && e.button !== 0) return;
+    if (e.target && (e.target.closest(".resize-handle") || e.target.closest(".clock-toolbar"))) return;
 
+    e.preventDefault();
+
+    const rect = widget.getBoundingClientRect();
+    widget.style.left = rect.left + "px";
+    widget.style.top = rect.top + "px";
+    widget.style.right = "auto";
+    widget.style.transformOrigin = "top left";
+
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+    const w = rect.width;
+    const h = rect.height;
+
+    dragArea.classList.add("dragging");
+    widget.classList.add("dragging");
     dragArea.setPointerCapture(e.pointerId);
 
     const move = (ev) => {
-      widget.style.left = startLeft + (ev.clientX - startX) + "px";
-      widget.style.top = startTop + (ev.clientY - startY) + "px";
+      ev.preventDefault();
+      const nextLeft = ev.clientX - offsetX;
+      const nextTop = ev.clientY - offsetY;
+      const maxLeft = Math.max(0, window.innerWidth - w);
+      const maxTop = Math.max(0, window.innerHeight - h);
+      const clampedLeft = Math.min(Math.max(0, nextLeft), maxLeft);
+      const clampedTop = Math.min(Math.max(0, nextTop), maxTop);
+      widget.style.left = clampedLeft + "px";
+      widget.style.top = clampedTop + "px";
     };
 
     const up = () => {
-      dragArea.releasePointerCapture(e.pointerId);
+      try { dragArea.releasePointerCapture(e.pointerId); } catch (_) {}
       dragArea.removeEventListener("pointermove", move);
       dragArea.removeEventListener("pointerup", up);
+      dragArea.removeEventListener("pointercancel", up);
+      dragArea.classList.remove("dragging");
+      widget.classList.remove("dragging");
     };
 
     dragArea.addEventListener("pointermove", move);
     dragArea.addEventListener("pointerup", up);
+    dragArea.addEventListener("pointercancel", up);
   });
 
   /* ---------- SCALE (SAFE) ---------- */

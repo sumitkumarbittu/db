@@ -568,6 +568,7 @@ tr:hover {
   left: auto;            /* important */
   font-family: system-ui, -apple-system, Segoe UI, monospace;
   user-select: none;
+  touch-action: none;
   cursor: default;
   transform-origin: top right;
 }
@@ -603,7 +604,12 @@ tr:hover {
   border: 2px solid currentColor;
   border-radius: 14px;
   background: transparent;
-  cursor: move;
+  cursor: grab;
+}
+
+#clock-widget.dragging .clock-body,
+.clock-body.dragging {
+  cursor: grabbing;
 }
 
 .time-box {
