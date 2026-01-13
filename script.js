@@ -1,8 +1,8 @@
 const API_BASES = {
   A: "https://db-btl1.onrender.com",
   B: "https://db2-tle6.onrender.com",
-  C: "https://db3-isfk.onrender.com",
-  D: "https://db4-oj0t.onrender.com"
+  E: "https://db5-nhy1.onrender.com",
+  F: "https://db6-c4rn.onrender.com"
 };
 
 let ACTIVE_API_KEY = "A";
